@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cutting Optimizer Pro</title>
+<style>
+  :root{
+    --navy:#0F172A; --navy2:#1E293B; --gold:#FFCC00; --emerald:#10B981;
+    --bg:#F8FAFC; --card:#FFFFFF; --text:#0F172A; --muted:#64748B; --border:#E2E8F0;
+    --danger:#EF4444;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);}
+  header{background:var(--navy);color:#fff;padding:20px 16px;text-align:center;}
+  header h1{margin:0;font-size:1.4rem;font-weight:700;letter-spacing:.3px;}
+  header p{margin:4px 0 0;color:#94A3B8;font-size:.85rem;}
+  .tabs{display:flex;max-width:720px;margin:16px auto 0;padding:0 12px;gap:8px;}
+  .tab{flex:1;padding:10px;text-align:center;border-radius:10px 10px 0 0;background:var(--card);color:var(--muted);font-weight:600;cursor:pointer;border:1px solid var(--border);border-bottom:none;font-size:.9rem;}
+  .tab.active{background:var(--card);color:var(--navy);border-bottom:3px solid var(--gold);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 12px 40px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:0 0 14px 14px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .card.rounded{border-radius:14px;margin-top:16px;}
+  h2{font-size:1rem;margin:0 0 12px;color:var(--navy);}
+  label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;font-weight:600;}
+  input, select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:.95rem;margin-bottom:12px;background:#fff;color:var(--text);}
+  input:focus, select:focus{outline:2px solid var(--emerald);border-color:var(--emerald);}
+  .row{display:flex;gap:10px;}
+  .row > div{flex:1;}
+  .item-row{display:flex;gap:8px;align-items:end;margin-bottom:8px;background:#F1F5F9;padding:8px;border-radius:8px;}
+  .item-row input{margin-bottom:0;}
+  .item-row .del{flex:0 0 40px;background:var(--danger);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:700;cursor:pointer;}
+  .btn{display:inline-block;padding:11px 18px;border-radius:9px;border:none;font-weight:700;cursor:pointer;font-size:.9rem;}
+  .btn-add{background:var(--navy2);color:#fff;width:100%;margin-bottom:14px;}
+  .btn-primary{background:var(--emerald);color:#fff;width:100%;font-size:1rem;padding:13px;}
+  .btn-primary:active{opacity:.85;}
+  .results{margin-top:18px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+  .stat{background:var(--navy);color:#fff;border-radius:10px;padding:12px 8px;text-align:center;}
+  .stat .num{font-size:1.25rem;font-weight:800;color:var(--gold);}
+  .stat .lbl{font-size:.68rem;color:#94A3B8;margin-top:2px;}
+  .stock-block{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+  .stock-head{background:#F1F5F9;padding:8px 12px;font-size:.82rem;font-weight:700;display:flex;justify-content:space-between;color:var(--navy2);}
+  .bar{position:relative;height:38px;background:repeating-linear-gradient(45deg,#F1F5F9,#F1F5F9 6px,#E2E8F0 6px,#E2E8F0 12px);margin:10px;border-radius:6px;overflow:hidden;display:flex;}
+  .seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.68rem;color:#fff;font-weight:700;border-right:2px solid #fff;overflow:hidden;white-space:nowrap;padding:0 2px;}
+  .waste-seg{background:repeating-linear-gradient(45deg,#FCA5A5,#FCA5A5 4px,#EF4444 4px,#EF4444 8px)!important;color:#7F1D1D;}
+  .sheet2d{position:relative;border:2px solid var(--navy2);border-radius:6px;margin:10px;background:repeating-linear-gradient(45deg,#F1F5F9,#F1F5F9 6px,#E2E8F0 6px,#E2E8F0 12px);}
+  .rect2d{position:absolute;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;font-weight:700;text-align:center;overflow:hidden;}
+  .legend{display:flex;gap:14px;align-items:center;font-size:.72rem;color:var(--muted);margin:6px 12px 12px;flex-wrap:wrap;}
+  .swatch{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle;}
+  .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:.9rem;}
+  .hint{font-size:.75rem;color:var(--muted);margin-top:-6px;margin-bottom:12px;}
+  .io-row{display:flex;gap:8px;margin-bottom:6px;}
+  .btn-io{flex:1;background:#F1F5F9;color:var(--navy2);border:1px solid var(--border);padding:9px;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;}
+  .btn-io:active{background:#E2E8F0;}
+  .out-row{display:flex;gap:8px;margin-bottom:14px;}
+  .btn-out{flex:1;background:var(--navy2);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer;}
+  .paste-box{width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:.85rem;margin-bottom:8px;}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .modal{background:#fff;border-radius:14px;padding:18px;max-width:460px;width:100%;}
+  .modal h3{margin:0 0 10px;font-size:1rem;color:var(--navy);}
+  .modal .actions{display:flex;gap:8px;margin-top:10px;}
+  .modal .actions button{flex:1;padding:10px;border-radius:8px;border:none;font-weight:700;cursor:pointer;}
+  .modal .cancel{background:#F1F5F9;color:var(--navy2);}
+  .modal .apply{background:var(--emerald);color:#fff;}
+  @media print{
+    header, .tabs, .card:not(.print-area), .io-row, .btn-add, .btn-primary, .out-row{display:none!important;}
+    body{background:#fff;}
+    .print-area{display:block!important;box-shadow:none;border:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✂️ Cutting Optimizer Pro</h1>
+  <p>Minimize offcut waste on bars, pipes, lumber &amp; sheets</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" id="tab1d" onclick="switchTab('1d')">1D — Lengths</div>
+  <div class="tab" id="tab2d" onclick="switchTab('2d')">2D — Sheets</div>
+</div>
+
+<div class="wrap">
+
+  <!-- 1D PANEL -->
+  <div id="panel1d">
+    <div class="card">
+      <h2>Stock Length</h2>
+      <div class="row">
+        <div>
+          <label>Length</label>
+          <input type="number" id="stockLen1d" value="6000" min="1">
+        </div>
+        <div>
+          <label>Unit</label>
+          <select id="unit1d">
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="m">m</option>
+            <option value="in">in</option>
+            <option value="ft">ft</option>
+          </select>
+        </div>
+      </div>
+      <label>Blade / Kerf width (cut loss per cut)</label>
+      <input type="number" id="kerf1d" value="3" min="0" step="0.1">
+
+      <h2 style="margin-top:16px;">Pieces Needed</h2>
+      <div id="items1d"></div>
+      <button class="btn btn-add" onclick="addItem1d()">+ Add Piece Size</button>
+
+      <div class="io-row">
+        <button class="btn btn-io" onclick="pasteInto1d()">📋 Paste</button>
+        <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()">⬆ Import CSV</button>
+        <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
+      </div>
+      <div class="hint">Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.</div>
+
+      <button class="btn btn-primary" onclick="runOptimize1d()">Optimize Cutting Plan</button>
+    </div>
+
+    <div id="results1d" class="results"></div>
+  </div>
+
+  <!-- 2D PANEL -->
+  <div id="panel2d" style="display:none;">
+    <div class="card">
+      <h2>Sheet Size</h2>
+      <div class="row">
+        <div><label>Width</label><input type="number" id="sheetW" value="2440" min="1"></div>
+        <div><label>Height</label><input type="number" id="sheetH" value="1220" min="1"></div>
+        <div><label>Unit</label>
+          <select id="unit2d">
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="m">m</option>
+            <option value="in">in</option>
+            <option value="ft">ft</option>
+          </select>
+        </div>
+      </div>
+      <label>Saw / Blade kerf (cut loss)</label>
+      <input type="number" id="kerf2d" value="3" min="0" step="0.1">
+
+      <h2 style="margin-top:16px;">Panels Needed</h2>
+      <div id="items2d"></div>
+      <button class="btn btn-add" onclick="addItem2d()">+ Add Panel Size</button>
+
+      <div class="io-row">
+        <button class="btn btn-io" onclick="pasteInto2d()">📋 Paste</button>
+        <button class="btn btn-io" onclick="document.getElementById('csvFile2d').click()">⬆ Import CSV</button>
+        <input type="file" id="csvFile2d" accept=".csv,text/csv" style="display:none" onchange="importCsv2d(this)">
+      </div>
+      <div class="hint">Paste rows as: width, height, qty, label (one per line) — from a spreadsheet or text.</div>
+
+      <button class="btn btn-primary" onclick="runOptimize2d()">Optimize Cutting Plan</button>
+    </div>
+
+    <div id="results2d" class="results"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- shared helpers ---------------- */
+let lastResult1d = null;
+let lastResult2d = null;
+
+function printResults(){ window.print(); }
+
+function downloadFile(filename, content){
+  const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function csvParseRows(text){
+  return text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length>0)
+    .map(l=> l.split(/,|\t/).map(c=>c.trim().replace(/^"|"$/g,'')));
+}
+
+/* ----- generic paste modal ----- */
+function openPasteModal(title, placeholder, onApply){
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `<div class="modal">
+    <h3>${title}</h3>
+    <textarea class="paste-box" id="pasteArea" placeholder="${placeholder}"></textarea>
+    <div class="actions">
+      <button class="cancel" id="pasteCancel">Cancel</button>
+      <button class="apply" id="pasteApply">Add Items</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  document.getElementById('pasteCancel').onclick = ()=> bg.remove();
+  bg.onclick = (e)=>{ if(e.target===bg) bg.remove(); };
+  document.getElementById('pasteApply').onclick = ()=>{
+    const text = document.getElementById('pasteArea').value;
+    onApply(text);
+    bg.remove();
+  };
+}
+
+function pasteInto1d(){
+  openPasteModal('Paste Piece List', 'e.g.\n1200, 4, Leg\n800, 2, Rail\n450, 6, Support', (text)=>{
+    const rows = csvParseRows(text);
+    rows.forEach(r=>{
+      if(r.length===0) return;
+      // skip header row if non-numeric first cell
+      if(isNaN(parseFloat(r[0]))) return;
+      const len = parseFloat(r[0]);
+      const qty = r[1] ? parseInt(r[1]) : 1;
+      const label = r[2] || 'Piece';
+      if(len>0) addItem1d(len, qty||1, label);
+    });
+  });
+}
+function pasteInto2d(){
+  openPasteModal('Paste Panel List', 'e.g.\n600, 400, 3, Shelf\n800, 300, 2, Divider', (text)=>{
+    const rows = csvParseRows(text);
+    rows.forEach(r=>{
+      if(r.length===0) return;
+      if(isNaN(parseFloat(r[0]))) return;
+      const w = parseFloat(r[0]);
+      const h = r[1] ? parseFloat(r[1]) : 0;
+      const qty = r[2] ? parseInt(r[2]) : 1;
+      const label = r[3] || 'Panel';
+      if(w>0 && h>0) addItem2d(w, h, qty||1, label);
+    });
+  });
+}
+
+function importCsv1d(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const rows = csvParseRows(e.target.result);
+    rows.forEach((r,i)=>{
+      if(r.length===0) return;
+      if(isNaN(parseFloat(r[0]))) return; // skip header
+      const len = parseFloat(r[0]);
+      const qty = r[1] ? parseInt(r[1]) : 1;
+      const label = r[2] || 'Piece';
+      if(len>0) addItem1d(len, qty||1, label);
+    });
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+function importCsv2d(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const rows = csvParseRows(e.target.result);
+    rows.forEach((r)=>{
+      if(r.length===0) return;
+      if(isNaN(parseFloat(r[0]))) return; // skip header
+      const w = parseFloat(r[0]);
+      const h = r[1] ? parseFloat(r[1]) : 0;
+      const qty = r[2] ? parseInt(r[2]) : 1;
+      const label = r[3] || 'Panel';
+      if(w>0 && h>0) addItem2d(w, h, qty||1, label);
+    });
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function downloadCsv1d(){
+  if(!lastResult1d) return;
+  const {bins, stockLen, kerf, unit} = lastResult1d;
+  let lines = [`Bar #,Piece Label,Piece Length (${unit}),Bar Waste (${unit})`];
+  bins.forEach((bin, bi)=>{
+    const waste = (stockLen - bin.used).toFixed(2);
+    bin.items.forEach((p, pi)=>{
+      lines.push(`${bi+1},${p.label},${p.len},${pi===0? waste : ''}`);
+    });
+  });
+  downloadFile('cutting_plan_1d.csv', lines.join('\n'));
+}
+function downloadCsv2d(){
+  if(!lastResult2d) return;
+  const {sheets, sheetW, sheetH, unit} = lastResult2d;
+  let lines = [`Sheet #,Panel Label,Width (${unit}),Height (${unit}),X Position,Y Position`];
+  sheets.forEach((sheet, si)=>{
+    sheet.shelves.forEach(shelf=>{
+      shelf.items.forEach(it=>{
+        lines.push(`${si+1},${it.label},${it.w},${it.h},${it.x.toFixed(1)},${it.y.toFixed(1)}`);
+      });
+    });
+  });
+  downloadFile('cutting_plan_2d.csv', lines.join('\n'));
+}
+
+const COLORS = ['#0F172A','#10B981','#F59E0B','#3B82F6','#8B5CF6','#EC4899','#14B8A6','#F97316','#6366F1','#84CC16','#06B6D4','#EF4444'];
+function colorFor(i){ return COLORS[i % COLORS.length]; }
+
+function switchTab(t){
+  document.getElementById('tab1d').classList.toggle('active', t==='1d');
+  document.getElementById('tab2d').classList.toggle('active', t==='2d');
+  document.getElementById('panel1d').style.display = t==='1d' ? 'block':'none';
+  document.getElementById('panel2d').style.display = t==='2d' ? 'block':'none';
+}
+
+/* ---------------- 1D UI ---------------- */
+let itemCount1d = 0;
+function addItem1d(len, qty, label){
+  itemCount1d++;
+  const id = 'i1d_'+itemCount1d;
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.id = id;
+  div.innerHTML = `
+    <div style="flex:2;"><label>Length</label><input type="number" class="len" value="${len||''}" placeholder="e.g. 1200" min="1"></div>
+    <div style="flex:1;"><label>Qty</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
+    <div style="flex:2;"><label>Label</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Leg"></div>
+    <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
+  document.getElementById('items1d').appendChild(div);
+}
+addItem1d(1200,4,'Leg');
+addItem1d(800,2,'Rail');
+addItem1d(450,6,'Support');
+
+/* ---------------- 2D UI ---------------- */
+let itemCount2d = 0;
+function addItem2d(w, h, qty, label){
+  itemCount2d++;
+  const id = 'i2d_'+itemCount2d;
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.id = id;
+  div.innerHTML = `
+    <div style="flex:1;"><label>Width</label><input type="number" class="w" value="${w||''}" placeholder="600" min="1"></div>
+    <div style="flex:1;"><label>Height</label><input type="number" class="h" value="${h||''}" placeholder="400" min="1"></div>
+    <div style="flex:1;"><label>Qty</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
+    <div style="flex:2;"><label>Label</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Shelf"></div>
+    <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
+  document.getElementById('items2d').appendChild(div);
+}
+addItem2d(600,400,3,'Shelf');
+addItem2d(800,300,2,'Divider');
+
+/* ================= 1D OPTIMIZER (cutting-pattern based, near-optimal) ================= */
+
+// Fallback heuristic (used only if pattern space is too large)
+function packBins1d(piecesIn, stockLen, kerf){
+  let bins = [];
+  for(const p of piecesIn){
+    let bestBin = null, bestLeftover = Infinity;
+    for(const bin of bins){
+      const needed = bin.items.length>0 ? p.len + kerf : p.len;
+      const leftover = stockLen - bin.used - needed;
+      if(leftover >= -1e-9 && leftover < bestLeftover){
+        bestLeftover = leftover; bestBin = bin;
+      }
+    }
+    if(bestBin){
+      const needed = bestBin.items.length>0 ? p.len + kerf : p.len;
+      bestBin.used += needed;
+      bestBin.items.push(p);
+    } else {
+      bins.push({items:[p], used:p.len});
+    }
+  }
+  return bins;
+}
+function wasteOfBins1d(bins, stockLen){
+  return bins.reduce((s,b)=> s + (stockLen - b.used), 0);
+}
+function bestPack1d(pieces, stockLen, kerf){
+  const strategies = [
+    [...pieces].sort((a,b)=>b.len-a.len),
+    [...pieces].sort((a,b)=>a.len-b.len),
+    [...pieces]
+  ];
+  let best = null, bestWaste = Infinity;
+  for(const order of strategies){
+    const bins = packBins1d(order, stockLen, kerf);
+    const w = wasteOfBins1d(bins, stockLen);
+    if(bins.length < (best? best.length: Infinity) || (best && bins.length===best.length && w<bestWaste)){
+      best = bins; bestWaste = w;
+    }
+  }
+  return best;
+}
+
+// Collapse pieces into distinct {len,label,qty} groups
+function distinctPieces1d(pieces){
+  const map = {};
+  pieces.forEach(p=>{
+    const key = p.len+'|'+p.label;
+    if(!map[key]) map[key] = {len:p.len, label:p.label, qty:0};
+    map[key].qty++;
+  });
+  return Object.values(map);
+}
+
+// Enumerate every valid cutting pattern (combination of piece counts) that fits in one stock bar
+function generatePatterns1d(items, stockLen, kerf){
+  const n = items.length;
+  const counts = new Array(n).fill(0);
+  let patterns = [];
+  function rec(idx, usedLen, usedCount){
+    if(idx===n){
+      if(usedCount>0){
+        const total = usedLen + (usedCount-1)*kerf;
+        if(total <= stockLen + 1e-6){
+          patterns.push({counts:counts.slice(), waste: stockLen-total});
+        }
+      }
+      return;
+    }
+    const len = items[idx].len;
+    let c = 0;
+    while(true){
+      const newUsedLen = usedLen + c*len;
+      const newUsedCount = usedCount + c;
+      const kerfSoFar = newUsedCount>0 ? (newUsedCount-1)*kerf : 0;
+      if(newUsedLen + kerfSoFar > stockLen + 1e-6) break;
+      counts[idx] = c;
+      rec(idx+1, newUsedLen, newUsedCount);
+      c++;
+    }
+    counts[idx] = 0;
+  }
+  rec(0,0,0);
+  return patterns;
+}
+
+// Greedy pattern-cover: repeatedly apply the most efficient pattern that still fits remaining demand
+function optimizeWithPatterns1d(pieces, stockLen, kerf){
+  const items = distinctPieces1d(pieces).sort((a,b)=>b.len-a.len); // largest first = better pruning
+  const patterns = generatePatterns1d(items, stockLen, kerf);
+  if(patterns.length===0 || patterns.length>400000) return null;
+
+  let remaining = items.map(it=>it.qty);
+  let bars = [];
+  let guard = 0;
+  while(remaining.some(r=>r>0) && guard<20000){
+    guard++;
+    let bestPattern=null, bestRepeat=0, bestScore=-Infinity;
+    for(const pat of patterns){
+      let valid=true, anyPositive=false, maxRepeat=Infinity;
+      for(let i=0;i<items.length;i++){
+        if(pat.counts[i]>0){
+          anyPositive=true;
+          if(pat.counts[i]>remaining[i]){ valid=false; break; }
+          maxRepeat = Math.min(maxRepeat, Math.floor(remaining[i]/pat.counts[i]));
+        }
+      }
+      if(!valid || !anyPositive) continue;
+      const score = (stockLen-pat.waste)/stockLen; // utilization ratio
+      if(score>bestScore+1e-9 || (Math.abs(score-bestScore)<1e-9 && maxRepeat>bestRepeat)){
+        bestScore=score; bestPattern=pat; bestRepeat=maxRepeat;
+      }
+    }
+    if(!bestPattern) break;
+    for(let i=0;i<items.length;i++) remaining[i] -= bestPattern.counts[i]*bestRepeat;
+    for(let k=0;k<bestRepeat;k++) bars.push({counts:bestPattern.counts.slice()});
+  }
+  // any leftover (shouldn't normally happen) -> one bar each
+  for(let i=0;i<items.length;i++){
+    while(remaining[i]>0){
+      const c = new Array(items.length).fill(0);
+      c[i]=1;
+      bars.push({counts:c});
+      remaining[i]--;
+    }
+  }
+  // convert to bins format used by renderer
+  const bins = bars.map(bar=>{
+    let list=[];
+    for(let i=0;i<items.length;i++){
+      for(let k=0;k<bar.counts[i];k++) list.push({len:items[i].len, label:items[i].label});
+    }
+    list.sort((a,b)=>b.len-a.len);
+    const used = list.reduce((s,p)=>s+p.len,0) + Math.max(0,list.length-1)*kerf;
+    return {items:list, used};
+  });
+  return bins;
+}
+
+// Post-pack compaction: try to empty out the least-full bar by redistributing its pieces into others
+function compactBins1d(bins, stockLen, kerf){
+  let improved = true;
+  let guard = 0;
+  while(improved && guard<500){
+    improved = false;
+    guard++;
+    bins.sort((a,b)=>a.used-b.used);
+    for(let bi=0; bi<bins.length; bi++){
+      const bin = bins[bi];
+      if(bin.items.length===0) continue;
+      const itemsToPlace = [...bin.items];
+      const others = bins.filter((_,i)=>i!==bi);
+      let tempOthers = others.map(o=>({items:[...o.items], used:o.used}));
+      let allPlaced = true;
+      for(const p of itemsToPlace){
+        let placed = false;
+        for(const o of tempOthers){
+          const needed = o.items.length>0 ? p.len+kerf : p.len;
+          if(o.used+needed <= stockLen+1e-6){
+            o.used += needed; o.items.push(p); placed = true; break;
+          }
+        }
+        if(!placed){ allPlaced = false; break; }
+      }
+      if(allPlaced){
+        for(let i=0;i<others.length;i++){ others[i].items = tempOthers[i].items; others[i].used = tempOthers[i].used; }
+        bins.splice(bi,1);
+        improved = true;
+        break;
+      }
+    }
+  }
+  return bins;
+}
+
+function runOptimize1d(){
+  const stockLen = parseFloat(document.getElementById('stockLen1d').value);
+  const kerf = parseFloat(document.getElementById('kerf1d').value) || 0;
+  const unit = document.getElementById('unit1d').value;
+  const resultsDiv = document.getElementById('results1d');
+
+  if(!stockLen || stockLen<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">Enter a valid stock length.</div>'; return; }
+
+  // gather pieces
+  let pieces = [];
+  let labelIdx = {};
+  let idxCounter = 0;
+  document.querySelectorAll('#items1d .item-row').forEach(row=>{
+    const len = parseFloat(row.querySelector('.len').value);
+    const qty = parseInt(row.querySelector('.qty').value) || 0;
+    const label = row.querySelector('.label').value || ('Piece');
+    if(len>0 && qty>0){
+      if(!(label in labelIdx)) labelIdx[label] = idxCounter++;
+      for(let i=0;i<qty;i++) pieces.push({len, label});
+    }
+  });
+
+  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">Add at least one piece size.</div>'; return; }
+
+  const overLen = pieces.filter(p=>p.len > stockLen);
+  pieces = pieces.filter(p=>p.len <= stockLen);
+
+  // Use pattern-based near-optimal packing; fall back to heuristic if pattern space is too large
+  let bins = optimizeWithPatterns1d(pieces, stockLen, kerf);
+  if(!bins) bins = bestPack1d(pieces, stockLen, kerf);
+  // Compaction pass: squeezes out extra bars regardless of which method produced the result
+  bins = compactBins1d(bins, stockLen, kerf);
+
+  const totalStockUsed = bins.length * stockLen;
+  const totalPieceLen = pieces.reduce((s,p)=>s+p.len,0);
+  const totalKerfLoss = bins.reduce((s,b)=> s + Math.max(0,(b.items.length-1))*kerf, 0);
+  const totalWaste = totalStockUsed - totalPieceLen - totalKerfLoss;
+  const wastePct = ((totalWaste/totalStockUsed)*100).toFixed(1);
+  const efficiency = (100-wastePct).toFixed(1);
+
+  lastResult1d = {bins, stockLen, kerf, unit};
+
+  let html = `<div class="card rounded print-area">
+    <div class="stat-grid">
+      <div class="stat"><div class="num">${bins.length}</div><div class="lbl">STOCK BARS NEEDED</div></div>
+      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">MATERIAL EFFICIENCY</div></div>
+      <div class="stat"><div class="num">${totalWaste.toFixed(0)}${unit}</div><div class="lbl">TOTAL WASTE</div></div>
+    </div>
+    <div class="out-row">
+      <button class="btn-out" onclick="downloadCsv1d()">⬇ Download CSV</button>
+      <button class="btn-out" onclick="printResults()">🖨 Print</button>
+    </div>`;
+
+  if(overLen.length>0){
+    html += `<div style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:10px;border-radius:8px;font-size:.8rem;margin-bottom:14px;">
+      ⚠️ ${overLen.length} piece(s) longer than stock length were skipped — they don't fit on a single stock bar.
+    </div>`;
+  }
+
+  html += `<div class="legend">`;
+  Object.keys(labelIdx).forEach((lbl,i)=>{
+    html += `<span><span class="swatch" style="background:${colorFor(labelIdx[lbl])}"></span>${lbl}</span>`;
+  });
+  html += `<span><span class="swatch waste-seg" style="background:#EF4444;"></span>Waste</span></div>`;
+
+  bins.forEach((bin, bi)=>{
+    const wasteAmt = stockLen - bin.used;
+    html += `<div class="stock-block">
+      <div class="stock-head"><span>Bar #${bi+1}</span><span>Waste: ${wasteAmt.toFixed(0)}${unit}</span></div>
+      <div class="bar">`;
+    bin.items.forEach((p,pi)=>{
+      const w = (p.len/stockLen)*100;
+      html += `<div class="seg" style="width:${w}%;background:${colorFor(labelIdx[p.label])};" title="${p.label}: ${p.len}${unit}">${p.len}</div>`;
+      if(pi < bin.items.length-1 && kerf>0){
+        const kw = (kerf/stockLen)*100;
+        html += `<div class="seg" style="width:${kw}%;background:#94A3B8;"></div>`;
+      }
+    });
+    if(wasteAmt>0.01){
+      const ww = (wasteAmt/stockLen)*100;
+      html += `<div class="seg waste-seg" style="width:${ww}%;">${wasteAmt.toFixed(0)}</div>`;
+    }
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  resultsDiv.innerHTML = html;
+  resultsDiv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ================= 2D OPTIMIZER (Guillotine shelf packing, sorted by height desc) ================= */
+function runOptimize2d(){
+  const sheetW = parseFloat(document.getElementById('sheetW').value);
+  const sheetH = parseFloat(document.getElementById('sheetH').value);
+  const kerf = parseFloat(document.getElementById('kerf2d').value) || 0;
+  const unit = document.getElementById('unit2d').value;
+  const resultsDiv = document.getElementById('results2d');
+
+  if(!sheetW || !sheetH || sheetW<=0 || sheetH<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">Enter valid sheet dimensions.</div>'; return; }
+
+  let pieces = [];
+  let labelIdx = {};
+  let idxCounter = 0;
+  document.querySelectorAll('#items2d .item-row').forEach(row=>{
+    const w = parseFloat(row.querySelector('.w').value);
+    const h = parseFloat(row.querySelector('.h').value);
+    const qty = parseInt(row.querySelector('.qty').value) || 0;
+    const label = row.querySelector('.label').value || 'Panel';
+    if(w>0 && h>0 && qty>0){
+      if(!(label in labelIdx)) labelIdx[label] = idxCounter++;
+      for(let i=0;i<qty;i++) pieces.push({w,h,label});
+    }
+  });
+
+  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">Add at least one panel size.</div>'; return; }
+
+  // allow rotation: normalize so pieces try both orientations later
+  const overSize = pieces.filter(p => !fitsSheet(p, sheetW, sheetH));
+  pieces = pieces.filter(p => fitsSheet(p, sheetW, sheetH));
+
+  function fitsSheet(p, W, H){
+    return (p.w<=W && p.h<=H) || (p.h<=W && p.w<=H);
+  }
+
+  function newSheet(){ return { shelves: [] }; }
+
+  function placeOnSheet(sheet, p){
+    for(const shelf of sheet.shelves){
+      for(const rot of [false,true]){
+        const pw = rot? p.h:p.w, ph = rot? p.w:p.h;
+        if(ph <= shelf.height + 0.0001 && shelf.usedWidth + pw + (shelf.items.length>0?kerf:0) <= sheetW + 0.0001){
+          const x = shelf.usedWidth + (shelf.items.length>0?kerf:0);
+          shelf.items.push({...p, w:pw, h:ph, x, y:shelf.y});
+          shelf.usedWidth = x + pw;
+          return true;
+        }
+      }
+    }
+    for(const rot of [false,true]){
+      const pw = rot? p.h:p.w, ph = rot? p.w:p.h;
+      const yStart = sheet.shelves.length>0 ? sheet.shelves[sheet.shelves.length-1].y + sheet.shelves[sheet.shelves.length-1].height + kerf : 0;
+      if(yStart + ph <= sheetH + 0.0001 && pw <= sheetW + 0.0001){
+        sheet.shelves.push({ y:yStart, height:ph, usedWidth:pw, items:[{...p, w:pw, h:ph, x:0, y:yStart}] });
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function packSheets(order){
+    let sheets = [];
+    for(const p of order){
+      let placed = false;
+      for(const sheet of sheets){
+        if(placeOnSheet(sheet, p)){ placed = true; break; }
+      }
+      if(!placed){
+        const sheet = newSheet();
+        placeOnSheet(sheet, p);
+        sheets.push(sheet);
+      }
+    }
+    return sheets;
+  }
+
+  function sheetsWaste(sheets){
+    const used = sheets.reduce((s,sh)=> s + sh.shelves.reduce((s2,shelf)=> s2 + shelf.items.reduce((s3,it)=>s3+it.w*it.h,0), 0), 0);
+    return sheets.length*sheetW*sheetH - used;
+  }
+
+  // Try several sort orders (by height desc, by width desc, by area desc) and keep the best result
+  const orderings = [
+    [...pieces].sort((a,b)=> Math.max(b.w,b.h) - Math.max(a.w,a.h)),
+    [...pieces].sort((a,b)=> (b.w*b.h) - (a.w*a.h)),
+    [...pieces].sort((a,b)=> Math.min(b.w,b.h) - Math.min(a.w,a.h))
+  ];
+  let sheets = null, bestWaste = Infinity;
+  for(const order of orderings){
+    const attempt = packSheets(order);
+    const w = sheetsWaste(attempt);
+    if(!sheets || attempt.length < sheets.length || (attempt.length===sheets.length && w<bestWaste)){
+      sheets = attempt; bestWaste = w;
+    }
+  }
+
+  const sheetArea = sheetW*sheetH;
+  const totalSheetArea = sheets.length * sheetArea;
+  const totalPieceArea = pieces.reduce((s,p)=>s+p.w*p.h,0);
+  const totalWasteArea = totalSheetArea - totalPieceArea;
+  const wastePct = ((totalWasteArea/totalSheetArea)*100).toFixed(1);
+  const efficiency = (100-wastePct).toFixed(1);
+
+  lastResult2d = {sheets, sheetW, sheetH, kerf, unit};
+
+  let html = `<div class="card rounded print-area">
+    <div class="stat-grid">
+      <div class="stat"><div class="num">${sheets.length}</div><div class="lbl">SHEETS NEEDED</div></div>
+      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">MATERIAL EFFICIENCY</div></div>
+      <div class="stat"><div class="num">${(totalWasteArea/1000000).toFixed(2)}m²</div><div class="lbl">TOTAL WASTE AREA</div></div>
+    </div>
+    <div class="out-row">
+      <button class="btn-out" onclick="downloadCsv2d()">⬇ Download CSV</button>
+      <button class="btn-out" onclick="printResults()">🖨 Print</button>
+    </div>`;
+
+  if(overSize.length>0){
+    html += `<div style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:10px;border-radius:8px;font-size:.8rem;margin-bottom:14px;">
+      ⚠️ ${overSize.length} panel(s) too large for the sheet (even rotated) were skipped.
+    </div>`;
+  }
+
+  html += `<div class="legend">`;
+  Object.keys(labelIdx).forEach((lbl,i)=>{
+    html += `<span><span class="swatch" style="background:${colorFor(labelIdx[lbl])}"></span>${lbl}</span>`;
+  });
+  html += `</div>`;
+
+  const displayMaxW = 300; // px, will scale by aspect
+  sheets.forEach((sheet, si)=>{
+    const usedArea = sheet.shelves.reduce((s,sh)=> s + sh.items.reduce((s2,it)=>s2+it.w*it.h,0), 0);
+    const wasteA = sheetArea - usedArea;
+    const aspect = sheetH/sheetW;
+    const dispW = displayMaxW;
+    const dispH = displayMaxW*aspect;
+    html += `<div class="stock-block">
+      <div class="stock-head"><span>Sheet #${si+1}</span><span>Waste: ${(wasteA/1000000).toFixed(2)}m²</span></div>
+      <div class="sheet2d" style="width:${dispW}px;height:${dispH}px;">`;
+    sheet.shelves.forEach(shelf=>{
+      shelf.items.forEach(it=>{
+        const leftPct = (it.x/sheetW)*100;
+        const topPct = (it.y/sheetH)*100;
+        const wPct = (it.w/sheetW)*100;
+        const hPct = (it.h/sheetH)*100;
+        html += `<div class="rect2d" style="left:${leftPct}%;top:${topPct}%;width:${wPct}%;height:${hPct}%;background:${colorFor(labelIdx[it.label])};" title="${it.label}: ${it.w}x${it.h}${unit}">${it.w}×${it.h}</div>`;
+      });
+    });
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  resultsDiv.innerHTML = html;
+  resultsDiv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
