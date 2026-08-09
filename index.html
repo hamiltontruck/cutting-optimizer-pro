@@ -56,6 +56,15 @@
   .material-summary{background:#F1F5F9;border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin:10px 0 14px;font-size:.8rem;color:var(--navy2);}
   .material-summary strong{color:var(--navy);}
   .io-row{display:flex;gap:8px;margin-bottom:6px;}
+  .setup-heading{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;}
+  .setup-icon{font-size:2rem;line-height:1;}
+  .setup-heading h2{font-size:1.35rem;margin:0 0 4px;}
+  .setup-heading p,.section-intro{margin:0;color:var(--muted);font-size:.82rem;line-height:1.45;}
+  .project-name-input{text-align:center;font-weight:700;font-size:1rem;}
+  .rebar-heading{display:flex;gap:10px;align-items:flex-start;margin:20px 0 12px;}
+  .rebar-heading h2{font-size:1.2rem;margin:0 0 3px;}
+  .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 8px;}
+  .action-grid .btn{width:100%;margin:0;background:#16A34A;color:#fff;padding:12px 8px;}
   .btn-io{flex:1;background:#F1F5F9;color:var(--navy2);border:1px solid var(--border);padding:9px;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;}
   .btn-io:active{background:#E2E8F0;}
   .out-row{display:flex;gap:8px;margin-bottom:14px;}
@@ -105,6 +114,16 @@
   <!-- 1D PANEL -->
   <div id="panel1d">
     <div class="card">
+      <div class="setup-heading">
+        <div class="setup-icon">🏗️</div>
+        <div>
+          <h2 data-i18n="projectSetup">Project Setup</h2>
+          <p data-i18n="projectIntro">Enter stock and required rebar cuts.</p>
+        </div>
+      </div>
+      <label data-i18n="projectName">Project name</label>
+      <input class="project-name-input" type="text" id="projectName1d" value="My Rebar Project">
+
       <h2 data-i18n="stockLength">Stock Length</h2>
       <div class="row">
         <div>
@@ -154,15 +173,21 @@
       <label data-i18n="specification">Specification / Grade</label>
       <input type="text" id="specification1d" placeholder="e.g. ASTM A36">
 
-      <h2 style="margin-top:16px;" data-i18n="piecesNeeded">Pieces Needed</h2>
-      <div id="items1d"></div>
-      <button class="btn btn-add" onclick="addItem1d()" data-i18n="addPiece">+ Add Piece Size</button>
-
-      <div class="io-row">
-        <button class="btn btn-io" onclick="pasteInto1d()" data-i18n="paste">📋 Paste</button>
-        <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()" data-i18n="importCsv">⬆ Import CSV</button>
-        <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
+      <div class="rebar-heading">
+        <div class="setup-icon">✂️</div>
+        <div>
+          <h2 data-i18n="requiredRebar">Required Rebar</h2>
+          <p class="section-intro" data-i18n="rebarIntro">Diameter, cut length and quantity.</p>
+        </div>
       </div>
+      <div id="items1d"></div>
+      <div class="action-grid">
+        <button class="btn" onclick="addItem1d()" data-i18n="addRow">+ Add row</button>
+        <button class="btn" onclick="pasteInto1d()" data-i18n="paste">📋 Paste</button>
+        <button class="btn" onclick="document.getElementById('csvFile1d').click()" data-i18n="importCsv">📂 Import CSV</button>
+        <button class="btn" onclick="downloadRebarTemplate()" data-i18n="template">📄 Template</button>
+      </div>
+      <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
       <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty (one per line) — from a spreadsheet or text.</div>
 
       <button class="btn btn-primary" onclick="runOptimize1d()" data-i18n="optimizeBtn">Optimize Cutting Plan</button>
@@ -219,6 +244,9 @@ const TRANSLATIONS = {
     title:"Adil Abdu Cutting Optimizer Pro",
     subtitle:"Minimize offcut waste on bars, pipes, lumber & sheets",
     tab1d:"1D — Lengths", tab2d:"2D — Sheets",
+    projectSetup:"Project Setup", projectIntro:"Enter stock and required rebar cuts.",
+    projectName:"Project name", requiredRebar:"Required Rebar",
+    rebarIntro:"Diameter, cut length and quantity.", addRow:"+ Add row", template:"📄 Template",
     stockLength:"Stock Length", length:"Length", unit:"Unit",
     materialDetails:"Rod Details", materialType:"Material", productType:"Product Type",
     steel:"Steel", aluminium:"Aluminium", rod:"Rod", diameter:"Diameter (mm)",
@@ -253,6 +281,9 @@ const TRANSLATIONS = {
     title:"አዲል አብዱ Cutting Optimizer Pro",
     subtitle:"ብረት ዘንግ፣ ቧንቧ፣ እንጨትና ሰሌዳ ላይ ብክነትን ይቀንሱ",
     tab1d:"1መ — ርዝመቶች", tab2d:"2መ — ሰሌዳዎች",
+    projectSetup:"የፕሮጀክት ቅንብር", projectIntro:"የስቶክና የሚፈለጉ ብረት ቁርጥራጮችን ያስገቡ።",
+    projectName:"የፕሮጀክት ስም", requiredRebar:"የሚፈለግ ብረት",
+    rebarIntro:"ዲያሜትር፣ የቁረጥ ርዝመትና ብዛት።", addRow:"+ ረድፍ ጨምር", template:"📄 አብነት",
     stockLength:"የግንድ ርዝመት", length:"ርዝመት", unit:"መለኪያ",
     materialDetails:"የዘንግ ዝርዝሮች", materialType:"ቁሳቁስ", productType:"የምርት ዓይነት",
     steel:"ብረት", aluminium:"አሉሚኒየም", rod:"ዘንግ", diameter:"ዲያሜትር (ሚሜ)",
@@ -287,6 +318,9 @@ const TRANSLATIONS = {
     title:"Adil Abdu Cutting Optimizer Pro",
     subtitle:"Baala meeshaalee (bar), paayippii, muka fi gabatee irratti balleessaa xiqqeessaa",
     tab1d:"1D — Dheerina", tab2d:"2D — Gabatee",
+    projectSetup:"Qophii Pirojektii", projectIntro:"Stock fi rebar muramuu barbaachisu galchi.",
+    projectName:"Maqaa pirojektii", requiredRebar:"Rebar Barbaachisu",
+    rebarIntro:"Daayameetira, dheerina muramaa fi baay’ina.", addRow:"+ Sarara dabali", template:"📄 Teempileetii",
     stockLength:"Dheerina Meeshaa", length:"Dheerina", unit:"Madaalii",
     materialDetails:"Ibsa Rod", materialType:"Gosa Sibiilaa", productType:"Gosa Omishaa",
     steel:"Steel", aluminium:"Aluminium", rod:"Rod", diameter:"Daayameetira (mm)",
@@ -446,6 +480,7 @@ function escapeHtml(value){
 }
 function getRodDetails(){
   return {
+    project: document.getElementById('projectName1d').value.trim(),
     material: document.getElementById('materialType1d').value,
     product: document.getElementById('productType1d').value,
     diameter: document.getElementById('diameter1d').value,
@@ -456,6 +491,7 @@ function getRodDetails(){
 function materialSummaryHtml(){
   const d = getRodDetails();
   const details = [
+    d.project ? `${t('projectName')}: ${escapeHtml(d.project)}` : '',
     `${t('materialType')}: ${escapeHtml(d.material)}`,
     `${t('productType')}: ${escapeHtml(d.product)}`,
     d.diameter ? `${t('diameter')}: ${escapeHtml(d.diameter)}` : '',
@@ -469,6 +505,10 @@ let lastResult1d = null;
 let lastResult2d = null;
 
 function printResults(){ window.print(); }
+
+function downloadRebarTemplate(){
+  downloadFile('rebar-template.csv', 'Length,Qty\n1200,4\n800,2\n450,6');
+}
 
 function downloadFile(filename, content){
   const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
