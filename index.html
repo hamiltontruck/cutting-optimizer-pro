@@ -12,9 +12,12 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);}
-  header{background:var(--navy);color:#fff;padding:20px 16px;text-align:center;}
+  header{background:var(--navy);color:#fff;padding:20px 16px;text-align:center;position:relative;}
   header h1{margin:0;font-size:1.4rem;font-weight:700;letter-spacing:.3px;}
   header p{margin:4px 0 0;color:#94A3B8;font-size:.85rem;}
+  .lang-switch{position:absolute;top:12px;right:12px;display:flex;gap:4px;}
+  .lang-btn{background:rgba(255,255,255,.1);color:#CBD5E1;border:1px solid rgba(255,255,255,.2);padding:5px 9px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;}
+  .lang-btn.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
   .tabs{display:flex;max-width:720px;margin:16px auto 0;padding:0 12px;gap:8px;}
   .tab{flex:1;padding:10px;text-align:center;border-radius:10px 10px 0 0;background:var(--card);color:var(--muted);font-weight:600;cursor:pointer;border:1px solid var(--border);border-bottom:none;font-size:.9rem;}
   .tab.active{background:var(--card);color:var(--navy);border-bottom:3px solid var(--gold);}
@@ -55,6 +58,9 @@
   .btn-io:active{background:#E2E8F0;}
   .out-row{display:flex;gap:8px;margin-bottom:14px;}
   .btn-out{flex:1;background:var(--navy2);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer;}
+  .btn-cloud{display:block;width:100%;background:#2563EB;color:#fff;border:none;padding:12px;border-radius:9px;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:8px;}
+  .btn-cloud:disabled{opacity:.6;}
+  .cloud-tag{display:inline-block;background:#DBEAFE;color:#1D4ED8;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:6px;margin-left:6px;vertical-align:middle;}
   .paste-box{width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:8px;font-family:monospace;font-size:.85rem;margin-bottom:8px;}
   .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
   .modal{background:#fff;border-radius:14px;padding:18px;max-width:460px;width:100%;}
@@ -73,13 +79,18 @@
 <body>
 
 <header>
-  <h1>✂️ Cutting Optimizer Pro</h1>
-  <p>Minimize offcut waste on bars, pipes, lumber &amp; sheets</p>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="langBtn_en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="langBtn_am" onclick="setLang('am')">አማ</button>
+    <button class="lang-btn" id="langBtn_om" onclick="setLang('om')">OM</button>
+  </div>
+  <h1>✂️ <span data-i18n="title">Cutting Optimizer Pro</span></h1>
+  <p data-i18n="subtitle">Minimize offcut waste on bars, pipes, lumber &amp; sheets</p>
 </header>
 
 <div class="tabs">
-  <div class="tab active" id="tab1d" onclick="switchTab('1d')">1D — Lengths</div>
-  <div class="tab" id="tab2d" onclick="switchTab('2d')">2D — Sheets</div>
+  <div class="tab active" id="tab1d" onclick="switchTab('1d')" data-i18n="tab1d">1D — Lengths</div>
+  <div class="tab" id="tab2d" onclick="switchTab('2d')" data-i18n="tab2d">2D — Sheets</div>
 </div>
 
 <div class="wrap">
@@ -87,14 +98,14 @@
   <!-- 1D PANEL -->
   <div id="panel1d">
     <div class="card">
-      <h2>Stock Length</h2>
+      <h2 data-i18n="stockLength">Stock Length</h2>
       <div class="row">
         <div>
-          <label>Length</label>
+          <label data-i18n="length">Length</label>
           <input type="number" id="stockLen1d" value="6000" min="1">
         </div>
         <div>
-          <label>Unit</label>
+          <label data-i18n="unit">Unit</label>
           <select id="unit1d">
             <option value="mm">mm</option>
             <option value="cm">cm</option>
@@ -104,21 +115,23 @@
           </select>
         </div>
       </div>
-      <label>Blade / Kerf width (cut loss per cut)</label>
+      <label data-i18n="kerf1dLabel">Blade / Kerf width (cut loss per cut)</label>
       <input type="number" id="kerf1d" value="3" min="0" step="0.1">
 
-      <h2 style="margin-top:16px;">Pieces Needed</h2>
+      <h2 style="margin-top:16px;" data-i18n="piecesNeeded">Pieces Needed</h2>
       <div id="items1d"></div>
-      <button class="btn btn-add" onclick="addItem1d()">+ Add Piece Size</button>
+      <button class="btn btn-add" onclick="addItem1d()" data-i18n="addPiece">+ Add Piece Size</button>
 
       <div class="io-row">
-        <button class="btn btn-io" onclick="pasteInto1d()">📋 Paste</button>
-        <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()">⬆ Import CSV</button>
+        <button class="btn btn-io" onclick="pasteInto1d()" data-i18n="paste">📋 Paste</button>
+        <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()" data-i18n="importCsv">⬆ Import CSV</button>
         <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
       </div>
-      <div class="hint">Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.</div>
+      <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.</div>
 
-      <button class="btn btn-primary" onclick="runOptimize1d()">Optimize Cutting Plan</button>
+      <button class="btn btn-primary" onclick="runOptimize1d()" data-i18n="optimizeBtn">Optimize Cutting Plan</button>
+      <button class="btn btn-cloud" onclick="runCloudOptimize1d()" id="cloudBtn1d" data-i18n="cloudBtn">☁️ Solve with Cloud Optimizer (exact)</button>
+      <div class="hint" id="cloudStatus1d"></div>
     </div>
 
     <div id="results1d" class="results"></div>
@@ -127,11 +140,11 @@
   <!-- 2D PANEL -->
   <div id="panel2d" style="display:none;">
     <div class="card">
-      <h2>Sheet Size</h2>
+      <h2 data-i18n="sheetSize">Sheet Size</h2>
       <div class="row">
-        <div><label>Width</label><input type="number" id="sheetW" value="2440" min="1"></div>
-        <div><label>Height</label><input type="number" id="sheetH" value="1220" min="1"></div>
-        <div><label>Unit</label>
+        <div><label data-i18n="width">Width</label><input type="number" id="sheetW" value="2440" min="1"></div>
+        <div><label data-i18n="height">Height</label><input type="number" id="sheetH" value="1220" min="1"></div>
+        <div><label data-i18n="unit">Unit</label>
           <select id="unit2d">
             <option value="mm">mm</option>
             <option value="cm">cm</option>
@@ -141,21 +154,21 @@
           </select>
         </div>
       </div>
-      <label>Saw / Blade kerf (cut loss)</label>
+      <label data-i18n="kerf2dLabel">Saw / Blade kerf (cut loss)</label>
       <input type="number" id="kerf2d" value="3" min="0" step="0.1">
 
-      <h2 style="margin-top:16px;">Panels Needed</h2>
+      <h2 style="margin-top:16px;" data-i18n="panelsNeeded">Panels Needed</h2>
       <div id="items2d"></div>
-      <button class="btn btn-add" onclick="addItem2d()">+ Add Panel Size</button>
+      <button class="btn btn-add" onclick="addItem2d()" data-i18n="addPanel">+ Add Panel Size</button>
 
       <div class="io-row">
-        <button class="btn btn-io" onclick="pasteInto2d()">📋 Paste</button>
-        <button class="btn btn-io" onclick="document.getElementById('csvFile2d').click()">⬆ Import CSV</button>
+        <button class="btn btn-io" onclick="pasteInto2d()" data-i18n="paste">📋 Paste</button>
+        <button class="btn btn-io" onclick="document.getElementById('csvFile2d').click()" data-i18n="importCsv">⬆ Import CSV</button>
         <input type="file" id="csvFile2d" accept=".csv,text/csv" style="display:none" onchange="importCsv2d(this)">
       </div>
-      <div class="hint">Paste rows as: width, height, qty, label (one per line) — from a spreadsheet or text.</div>
+      <div class="hint" data-i18n="pasteHint2d">Paste rows as: width, height, qty, label (one per line) — from a spreadsheet or text.</div>
 
-      <button class="btn btn-primary" onclick="runOptimize2d()">Optimize Cutting Plan</button>
+      <button class="btn btn-primary" onclick="runOptimize2d()" data-i18n="optimizeBtn">Optimize Cutting Plan</button>
     </div>
 
     <div id="results2d" class="results"></div>
@@ -164,7 +177,224 @@
 </div>
 
 <script>
+/* ---------------- i18n ---------------- */
+const TRANSLATIONS = {
+  en: {
+    title:"Cutting Optimizer Pro",
+    subtitle:"Minimize offcut waste on bars, pipes, lumber & sheets",
+    tab1d:"1D — Lengths", tab2d:"2D — Sheets",
+    stockLength:"Stock Length", length:"Length", unit:"Unit",
+    kerf1dLabel:"Blade / Kerf width (cut loss per cut)",
+    piecesNeeded:"Pieces Needed", addPiece:"+ Add Piece Size",
+    paste:"📋 Paste", importCsv:"⬆ Import CSV",
+    pasteHint1d:"Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.",
+    optimizeBtn:"Optimize Cutting Plan",
+    cloudBtn:"☁️ Solve with Cloud Optimizer (exact)",
+    sheetSize:"Sheet Size", width:"Width", height:"Height",
+    kerf2dLabel:"Saw / Blade kerf (cut loss)",
+    panelsNeeded:"Panels Needed", addPanel:"+ Add Panel Size",
+    pasteHint2d:"Paste rows as: width, height, qty, label (one per line) — from a spreadsheet or text.",
+    rowLength:"Length", rowQty:"Qty", rowLabel:"Label", rowWidth:"Width", rowHeight:"Height",
+    phLeg:"Leg", phRail:"Rail", phSupport:"Support", phShelf:"Shelf", phDivider:"Divider",
+    statBars:"STOCK BARS NEEDED", statEff:"MATERIAL EFFICIENCY", statWaste:"TOTAL WASTE",
+    statSheets:"SHEETS NEEDED", statWasteArea:"TOTAL WASTE AREA",
+    downloadCsv:"⬇ Download CSV", print:"🖨 Print",
+    barN:"Bar #", sheetN:"Sheet #", wasteLbl:"Waste:", wasteLegend:"Waste",
+    errStock:"Enter a valid stock length.", errPieces:"Add at least one piece size.",
+    errSheet:"Enter valid sheet dimensions.", errPanels:"Add at least one panel size.",
+    overLenWarn:"piece(s) longer than stock length were skipped — they don't fit on a single stock bar.",
+    overSizeWarn:"panel(s) too large for the sheet (even rotated) were skipped.",
+    pasteModal1dTitle:"Paste Piece List", pasteModal2dTitle:"Paste Panel List",
+    cancel:"Cancel", addItems:"Add Items",
+    cloudOk:"✅ Proven optimal solution from Google OR-Tools.",
+    cloudPartial:"⚠️ Best solution found within time limit (may not be provably optimal).",
+    cloudSolving:"☁️ Solving (may take up to 60s if server was asleep)...",
+  },
+  am: {
+    title:"ካቲንግ ኦፕቲማይዘር ፕሮ",
+    subtitle:"ብረት ዘንግ፣ ቧንቧ፣ እንጨትና ሰሌዳ ላይ ብክነትን ይቀንሱ",
+    tab1d:"1መ — ርዝመቶች", tab2d:"2መ — ሰሌዳዎች",
+    stockLength:"የግንድ ርዝመት", length:"ርዝመት", unit:"መለኪያ",
+    kerf1dLabel:"የመጋዝ ውፍረት (በእያንዳንዱ ቁርጥ የሚጠፋ)",
+    piecesNeeded:"የሚያስፈልጉ ቁርጥራጮች", addPiece:"+ ቁርጥራጭ መጠን ጨምር",
+    paste:"📋 ለጥፍ", importCsv:"⬆ CSV አስገባ",
+    pasteHint1d:"ረድፎችን በዚህ መልኩ ይለጥፉ፦ ርዝመት, ብዛት, መለያ (በአንድ መስመር) — ከሠንጠረዥ ወይም ከጽሁፍ።",
+    optimizeBtn:"የመቁረጫ እቅድ አመቻች",
+    cloudBtn:"☁️ በደመና ኦፕቲማይዘር ፍታ (ትክክለኛ)",
+    sheetSize:"የሰሌዳ መጠን", width:"ስፋት", height:"ቁመት",
+    kerf2dLabel:"የመጋዝ ውፍረት (በቁርጥ የሚጠፋ)",
+    panelsNeeded:"የሚያስፈልጉ ሰሌዳዎች", addPanel:"+ ሰሌዳ መጠን ጨምር",
+    pasteHint2d:"ረድፎችን በዚህ መልኩ ይለጥፉ፦ ስፋት, ቁመት, ብዛት, መለያ (በአንድ መስመር)።",
+    rowLength:"ርዝመት", rowQty:"ብዛት", rowLabel:"መለያ", rowWidth:"ስፋት", rowHeight:"ቁመት",
+    phLeg:"እግር", phRail:"ራይል", phSupport:"ድጋፍ", phShelf:"መደርደሪያ", phDivider:"ክፋይ",
+    statBars:"የሚያስፈልጉ ግንዶች", statEff:"የቁሳቁስ ብቃት", statWaste:"ጠቅላላ ብክነት",
+    statSheets:"የሚያስፈልጉ ሰሌዳዎች", statWasteArea:"ጠቅላላ የብክነት ስፋት",
+    downloadCsv:"⬇ CSV አውርድ", print:"🖨 አትም",
+    barN:"ግንድ #", sheetN:"ሰሌዳ #", wasteLbl:"ብክነት:", wasteLegend:"ብክነት",
+    errStock:"ትክክለኛ የግንድ ርዝመት ያስገቡ።", errPieces:"ቢያንስ አንድ ቁርጥራጭ መጠን ያክሉ።",
+    errSheet:"ትክክለኛ የሰሌዳ መጠኖችን ያስገቡ።", errPanels:"ቢያንስ አንድ ሰሌዳ መጠን ያክሉ።",
+    overLenWarn:"ቁርጥራጮች ከግንድ ርዝመት ስለሚረዝሙ ታልፈዋል — በአንድ ግንድ ላይ አይገጥሙም።",
+    overSizeWarn:"ሰሌዳዎች ለሰሌዳው በጣም ትልቅ ስለሆኑ (ተገልብጠውም እንኳ) ታልፈዋል።",
+    pasteModal1dTitle:"የቁርጥራጭ ዝርዝር ለጥፍ", pasteModal2dTitle:"የሰሌዳ ዝርዝር ለጥፍ",
+    cancel:"ሰርዝ", addItems:"እቃዎችን ጨምር",
+    cloudOk:"✅ በGoogle OR-Tools የተረጋገጠ ምርጥ መፍትሄ።",
+    cloudPartial:"⚠️ በጊዜ ገደብ ውስጥ የተገኘ ምርጥ መፍትሄ (ሙሉ በሙሉ ላይረጋገጥ ይችላል)።",
+    cloudSolving:"☁️ በመፍታት ላይ (አገልጋዩ ተኝቶ ከነበረ እስከ 60 ሰከንድ ሊወስድ ይችላል)...",
+  },
+  om: {
+    title:"Cutting Optimizer Pro",
+    subtitle:"Baala meeshaalee (bar), paayippii, muka fi gabatee irratti balleessaa xiqqeessaa",
+    tab1d:"1D — Dheerina", tab2d:"2D — Gabatee",
+    stockLength:"Dheerina Meeshaa", length:"Dheerina", unit:"Madaalii",
+    kerf1dLabel:"Balbala Muraa (kerf) — dheerina murtii tokkoon tokkoon badu",
+    piecesNeeded:"Kutaawwan Barbaachisan", addPiece:"+ Hima Kutaa Dabali",
+    paste:"📋 Maxxansi", importCsv:"⬆ CSV Fidi",
+    pasteHint1d:"Sarara akka: dheerina, baay'ina, maqaa (tokkoon tokkoon sarara) — sanadaa ykn barruu irraa maxxansi.",
+    optimizeBtn:"Karoora Muraa Fooyyessi",
+    cloudBtn:"☁️ Furmaata Cloud Optimizer (sirriitti)",
+    sheetSize:"Bal'ina Gabatee", width:"Bal'ina", height:"Dheerina Ol Ka'aa",
+    kerf2dLabel:"Balbala Muraa (kerf)",
+    panelsNeeded:"Gabateewwan Barbaachisan", addPanel:"+ Hima Gabatee Dabali",
+    pasteHint2d:"Sarara akka: bal'ina, dheerina, baay'ina, maqaa (tokkoon tokkoon sarara) maxxansi.",
+    rowLength:"Dheerina", rowQty:"Baay'ina", rowLabel:"Maqaa", rowWidth:"Bal'ina", rowHeight:"Dheerina",
+    phLeg:"Miilla", phRail:"Rail", phSupport:"Deeggarsa", phShelf:"Foddaa", phDivider:"Gargar Baaftuu",
+    statBars:"Meeshaaleen Barbaachisan", statEff:"Bu'a-qabeessummaa Meeshaa", statWaste:"Balleessaa Waliigalaa",
+    statSheets:"Gabateewwan Barbaachisan", statWasteArea:"Bal'ina Balleessaa Waliigalaa",
+    downloadCsv:"⬇ CSV Buufadhu", print:"🖨 Maxxansi",
+    barN:"Meeshaa #", sheetN:"Gabatee #", wasteLbl:"Balleessaa:", wasteLegend:"Balleessaa",
+    errStock:"Dheerina meeshaa sirrii galchi.", errPieces:"Yoo xiqqaate hima kutaa tokko dabali.",
+    errSheet:"Bal'ina gabatee sirrii galchi.", errPanels:"Yoo xiqqaate hima gabatee tokko dabali.",
+    overLenWarn:"kutaaleen dheerina meeshaa caalu darbamaniiru — meeshaa tokko irratti hin ta'an.",
+    overSizeWarn:"gabateewwan gabatee caalaa guddaa ta'an (garagalfamanis) darbamaniiru.",
+    pasteModal1dTitle:"Tarree Kutaa Maxxansi", pasteModal2dTitle:"Tarree Gabatee Maxxansi",
+    cancel:"Haqi", addItems:"Meeshaalee Dabali",
+    cloudOk:"✅ Furmaata sirrii Google OR-Tools irraa mirkanaa'e.",
+    cloudPartial:"⚠️ Furmaata gaarii daangaa yeroo keessatti argame (mirkanaa'aa hin ta'u).",
+    cloudSolving:"☁️ Furaa jira (yoo sarvaan rafee ture sekondii 60 fudhachuu danda'a)...",
+  }
+};
+let currentLang = 'en';
+function t(key){ return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key; }
+function setLang(lang){
+  currentLang = lang;
+  try{ localStorage.setItem('cutopt_lang', lang); }catch(e){}
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('langBtn_en').classList.toggle('active', lang==='en');
+  document.getElementById('langBtn_am').classList.toggle('active', lang==='am');
+  document.getElementById('langBtn_om').classList.toggle('active', lang==='om');
+  document.documentElement.lang = lang;
+}
+(function initLang(){
+  let saved = 'en';
+  try{ saved = localStorage.getItem('cutopt_lang') || 'en'; }catch(e){}
+  currentLang = saved;
+})();
+
 /* ---------------- shared helpers ---------------- */
+const CLOUD_API_URL = 'https://cutting-optimizer-pro.onrender.com/api/optimize/1d';
+
+async function runCloudOptimize1d(){
+  const stockLen = parseFloat(document.getElementById('stockLen1d').value);
+  const kerf = parseFloat(document.getElementById('kerf1d').value) || 0;
+  const unit = document.getElementById('unit1d').value;
+  const resultsDiv = document.getElementById('results1d');
+  const statusDiv = document.getElementById('cloudStatus1d');
+  const btn = document.getElementById('cloudBtn1d');
+
+  if(!stockLen || stockLen<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errStock')+'</div>'; return; }
+
+  let pieceMap = {};
+  document.querySelectorAll('#items1d .item-row').forEach(row=>{
+    const len = parseFloat(row.querySelector('.len').value);
+    const qty = parseInt(row.querySelector('.qty').value) || 0;
+    const label = row.querySelector('.label').value || 'Piece';
+    if(len>0 && qty>0){
+      const key = len+'|'+label;
+      if(!pieceMap[key]) pieceMap[key] = {len, qty:0, label};
+      pieceMap[key].qty += qty;
+    }
+  });
+  const pieces = Object.values(pieceMap);
+  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errPieces')+'</div>'; return; }
+
+  btn.disabled = true;
+  btn.textContent = t('cloudSolving');
+  statusDiv.textContent = '';
+
+  try{
+    const res = await fetch(CLOUD_API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({pieces, stock_len: stockLen, kerf, time_limit: 15})
+    });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({error:'Unknown server error'}));
+      throw new Error(err.error || ('HTTP '+res.status));
+    }
+    const data = await res.json();
+    renderCloudResult1d(data, stockLen, kerf, unit);
+    statusDiv.textContent = data.optimal ? t('cloudOk') : t('cloudPartial');
+  }catch(e){
+    statusDiv.textContent = '❌ Cloud solver error: '+e.message+' (falling back to instant local result — try again in a minute if server was waking up)';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '☁️ Solve with Cloud Optimizer (exact)';
+  }
+}
+
+function renderCloudResult1d(data, stockLen, kerf, unit){
+  const resultsDiv = document.getElementById('results1d');
+  const bins = data.bars.map(b=>({items:b.items, used:b.used}));
+  lastResult1d = {bins, stockLen, kerf, unit};
+
+  let html = `<div class="card rounded print-area">
+    <div class="stat-grid">
+      <div class="stat"><div class="num">${data.num_bars}</div><div class="lbl">${t('statBars')}<span class="cloud-tag">CLOUD</span></div></div>
+      <div class="stat"><div class="num">${data.efficiency}%</div><div class="lbl">${t('statEff')}</div></div>
+      <div class="stat"><div class="num">${data.waste.toFixed(0)}${unit}</div><div class="lbl">${t('statWaste')}</div></div>
+    </div>
+    <div class="out-row">
+      <button class="btn-out" onclick="downloadCsv1d()">${t('downloadCsv')}</button>
+      <button class="btn-out" onclick="printResults()">${t('print')}</button>
+    </div>`;
+
+  let labelIdx = {}, idxCounter = 0;
+  bins.forEach(b=> b.items.forEach(it=>{ if(!(it.label in labelIdx)) labelIdx[it.label]=idxCounter++; }));
+
+  html += `<div class="legend">`;
+  Object.keys(labelIdx).forEach(lbl=>{
+    html += `<span><span class="swatch" style="background:${colorFor(labelIdx[lbl])}"></span>${lbl}</span>`;
+  });
+  html += `<span><span class="swatch waste-seg" style="background:#EF4444;"></span>Waste</span></div>`;
+
+  bins.forEach((bin, bi)=>{
+    const wasteAmt = stockLen - bin.used;
+    html += `<div class="stock-block">
+      <div class="stock-head"><span>${t('barN')}${bi+1}</span><span>${t('wasteLbl')} ${wasteAmt.toFixed(0)}${unit}</span></div>
+      <div class="bar">`;
+    bin.items.forEach((p,pi)=>{
+      const w = (p.len/stockLen)*100;
+      html += `<div class="seg" style="width:${w}%;background:${colorFor(labelIdx[p.label])};" title="${p.label}: ${p.len}${unit}">${p.len}</div>`;
+      if(pi < bin.items.length-1 && kerf>0){
+        const kw = (kerf/stockLen)*100;
+        html += `<div class="seg" style="width:${kw}%;background:#94A3B8;"></div>`;
+      }
+    });
+    if(wasteAmt>0.01){
+      const ww = (wasteAmt/stockLen)*100;
+      html += `<div class="seg waste-seg" style="width:${ww}%;">${wasteAmt.toFixed(0)}</div>`;
+    }
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  resultsDiv.innerHTML = html;
+  resultsDiv.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+
 let lastResult1d = null;
 let lastResult2d = null;
 
@@ -192,8 +422,8 @@ function openPasteModal(title, placeholder, onApply){
     <h3>${title}</h3>
     <textarea class="paste-box" id="pasteArea" placeholder="${placeholder}"></textarea>
     <div class="actions">
-      <button class="cancel" id="pasteCancel">Cancel</button>
-      <button class="apply" id="pasteApply">Add Items</button>
+      <button class="cancel" id="pasteCancel">${t('cancel')}</button>
+      <button class="apply" id="pasteApply">${t('addItems')}</button>
     </div>
   </div>`;
   document.body.appendChild(bg);
@@ -207,7 +437,7 @@ function openPasteModal(title, placeholder, onApply){
 }
 
 function pasteInto1d(){
-  openPasteModal('Paste Piece List', 'e.g.\n1200, 4, Leg\n800, 2, Rail\n450, 6, Support', (text)=>{
+  openPasteModal(t('pasteModal1dTitle'), 'e.g.\n1200, 4, Leg\n800, 2, Rail\n450, 6, Support', (text)=>{
     const rows = csvParseRows(text);
     rows.forEach(r=>{
       if(r.length===0) return;
@@ -221,7 +451,7 @@ function pasteInto1d(){
   });
 }
 function pasteInto2d(){
-  openPasteModal('Paste Panel List', 'e.g.\n600, 400, 3, Shelf\n800, 300, 2, Divider', (text)=>{
+  openPasteModal(t('pasteModal2dTitle'), 'e.g.\n600, 400, 3, Shelf\n800, 300, 2, Divider', (text)=>{
     const rows = csvParseRows(text);
     rows.forEach(r=>{
       if(r.length===0) return;
@@ -318,15 +548,15 @@ function addItem1d(len, qty, label){
   div.className = 'item-row';
   div.id = id;
   div.innerHTML = `
-    <div style="flex:2;"><label>Length</label><input type="number" class="len" value="${len||''}" placeholder="e.g. 1200" min="1"></div>
-    <div style="flex:1;"><label>Qty</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
-    <div style="flex:2;"><label>Label</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Leg"></div>
+    <div style="flex:2;"><label>${t('rowLength')}</label><input type="number" class="len" value="${len||''}" placeholder="e.g. 1200" min="1"></div>
+    <div style="flex:1;"><label>${t('rowQty')}</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
+    <div style="flex:2;"><label>${t('rowLabel')}</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Leg"></div>
     <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
   document.getElementById('items1d').appendChild(div);
 }
-addItem1d(1200,4,'Leg');
-addItem1d(800,2,'Rail');
-addItem1d(450,6,'Support');
+addItem1d(1200,4,t('phLeg'));
+addItem1d(800,2,t('phRail'));
+addItem1d(450,6,t('phSupport'));
 
 /* ---------------- 2D UI ---------------- */
 let itemCount2d = 0;
@@ -337,15 +567,15 @@ function addItem2d(w, h, qty, label){
   div.className = 'item-row';
   div.id = id;
   div.innerHTML = `
-    <div style="flex:1;"><label>Width</label><input type="number" class="w" value="${w||''}" placeholder="600" min="1"></div>
-    <div style="flex:1;"><label>Height</label><input type="number" class="h" value="${h||''}" placeholder="400" min="1"></div>
-    <div style="flex:1;"><label>Qty</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
-    <div style="flex:2;"><label>Label</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Shelf"></div>
+    <div style="flex:1;"><label>${t('rowWidth')}</label><input type="number" class="w" value="${w||''}" placeholder="600" min="1"></div>
+    <div style="flex:1;"><label>${t('rowHeight')}</label><input type="number" class="h" value="${h||''}" placeholder="400" min="1"></div>
+    <div style="flex:1;"><label>${t('rowQty')}</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
+    <div style="flex:2;"><label>${t('rowLabel')}</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Shelf"></div>
     <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
   document.getElementById('items2d').appendChild(div);
 }
-addItem2d(600,400,3,'Shelf');
-addItem2d(800,300,2,'Divider');
+addItem2d(600,400,3,t('phShelf'));
+addItem2d(800,300,2,t('phDivider'));
 
 /* ================= 1D OPTIMIZER (cutting-pattern based, near-optimal) ================= */
 
@@ -529,7 +759,7 @@ function runOptimize1d(){
   const unit = document.getElementById('unit1d').value;
   const resultsDiv = document.getElementById('results1d');
 
-  if(!stockLen || stockLen<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">Enter a valid stock length.</div>'; return; }
+  if(!stockLen || stockLen<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errStock')+'</div>'; return; }
 
   // gather pieces
   let pieces = [];
@@ -545,7 +775,7 @@ function runOptimize1d(){
     }
   });
 
-  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">Add at least one piece size.</div>'; return; }
+  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errPieces')+'</div>'; return; }
 
   const overLen = pieces.filter(p=>p.len > stockLen);
   pieces = pieces.filter(p=>p.len <= stockLen);
@@ -567,18 +797,18 @@ function runOptimize1d(){
 
   let html = `<div class="card rounded print-area">
     <div class="stat-grid">
-      <div class="stat"><div class="num">${bins.length}</div><div class="lbl">STOCK BARS NEEDED</div></div>
-      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">MATERIAL EFFICIENCY</div></div>
-      <div class="stat"><div class="num">${totalWaste.toFixed(0)}${unit}</div><div class="lbl">TOTAL WASTE</div></div>
+      <div class="stat"><div class="num">${bins.length}</div><div class="lbl">${t('statBars')}</div></div>
+      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">${t('statEff')}</div></div>
+      <div class="stat"><div class="num">${totalWaste.toFixed(0)}${unit}</div><div class="lbl">${t('statWaste')}</div></div>
     </div>
     <div class="out-row">
-      <button class="btn-out" onclick="downloadCsv1d()">⬇ Download CSV</button>
-      <button class="btn-out" onclick="printResults()">🖨 Print</button>
+      <button class="btn-out" onclick="downloadCsv1d()">${t('downloadCsv')}</button>
+      <button class="btn-out" onclick="printResults()">${t('print')}</button>
     </div>`;
 
   if(overLen.length>0){
     html += `<div style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:10px;border-radius:8px;font-size:.8rem;margin-bottom:14px;">
-      ⚠️ ${overLen.length} piece(s) longer than stock length were skipped — they don't fit on a single stock bar.
+      ⚠️ ${overLen.length} ${t('overLenWarn')}
     </div>`;
   }
 
@@ -591,7 +821,7 @@ function runOptimize1d(){
   bins.forEach((bin, bi)=>{
     const wasteAmt = stockLen - bin.used;
     html += `<div class="stock-block">
-      <div class="stock-head"><span>Bar #${bi+1}</span><span>Waste: ${wasteAmt.toFixed(0)}${unit}</span></div>
+      <div class="stock-head"><span>${t('barN')}${bi+1}</span><span>${t('wasteLbl')} ${wasteAmt.toFixed(0)}${unit}</span></div>
       <div class="bar">`;
     bin.items.forEach((p,pi)=>{
       const w = (p.len/stockLen)*100;
@@ -621,7 +851,7 @@ function runOptimize2d(){
   const unit = document.getElementById('unit2d').value;
   const resultsDiv = document.getElementById('results2d');
 
-  if(!sheetW || !sheetH || sheetW<=0 || sheetH<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">Enter valid sheet dimensions.</div>'; return; }
+  if(!sheetW || !sheetH || sheetW<=0 || sheetH<=0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errSheet')+'</div>'; return; }
 
   let pieces = [];
   let labelIdx = {};
@@ -637,7 +867,7 @@ function runOptimize2d(){
     }
   });
 
-  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">Add at least one panel size.</div>'; return; }
+  if(pieces.length===0){ resultsDiv.innerHTML = '<div class="card rounded empty">'+t('errPanels')+'</div>'; return; }
 
   // allow rotation: normalize so pieces try both orientations later
   const overSize = pieces.filter(p => !fitsSheet(p, sheetW, sheetH));
@@ -719,9 +949,9 @@ function runOptimize2d(){
 
   let html = `<div class="card rounded print-area">
     <div class="stat-grid">
-      <div class="stat"><div class="num">${sheets.length}</div><div class="lbl">SHEETS NEEDED</div></div>
-      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">MATERIAL EFFICIENCY</div></div>
-      <div class="stat"><div class="num">${(totalWasteArea/1000000).toFixed(2)}m²</div><div class="lbl">TOTAL WASTE AREA</div></div>
+      <div class="stat"><div class="num">${sheets.length}</div><div class="lbl">${t('statSheets')}</div></div>
+      <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">${t('statEff')}</div></div>
+      <div class="stat"><div class="num">${(totalWasteArea/1000000).toFixed(2)}m²</div><div class="lbl">${t('statWasteArea')}</div></div>
     </div>
     <div class="out-row">
       <button class="btn-out" onclick="downloadCsv2d()">⬇ Download CSV</button>
@@ -730,7 +960,7 @@ function runOptimize2d(){
 
   if(overSize.length>0){
     html += `<div style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;padding:10px;border-radius:8px;font-size:.8rem;margin-bottom:14px;">
-      ⚠️ ${overSize.length} panel(s) too large for the sheet (even rotated) were skipped.
+      ⚠️ ${overSize.length} ${t('overSizeWarn')}
     </div>`;
   }
 
@@ -748,7 +978,7 @@ function runOptimize2d(){
     const dispW = displayMaxW;
     const dispH = displayMaxW*aspect;
     html += `<div class="stock-block">
-      <div class="stock-head"><span>Sheet #${si+1}</span><span>Waste: ${(wasteA/1000000).toFixed(2)}m²</span></div>
+      <div class="stock-head"><span>${t('sheetN')}${si+1}</span><span>${t('wasteLbl')} ${(wasteA/1000000).toFixed(2)}m²</span></div>
       <div class="sheet2d" style="width:${dispW}px;height:${dispH}px;">`;
     sheet.shelves.forEach(shelf=>{
       shelf.items.forEach(it=>{
@@ -766,6 +996,9 @@ function runOptimize2d(){
   resultsDiv.innerHTML = html;
   resultsDiv.scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+// Apply saved/default language to static tagged elements on load
+setLang(currentLang);
 </script>
 </body>
 </html>
