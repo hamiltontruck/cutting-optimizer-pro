@@ -132,7 +132,7 @@
         <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()" data-i18n="importCsv">⬆ Import CSV</button>
         <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
       </div>
-      <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.</div>
+      <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty (one per line) — from a spreadsheet or text.</div>
 
       <button class="btn btn-primary" onclick="runOptimize1d()" data-i18n="optimizeBtn">Optimize Cutting Plan</button>
       <button class="btn btn-cloud" onclick="runCloudOptimize1d()" id="cloudBtn1d" data-i18n="cloudBtn">☁️ Solve with Cloud Optimizer (exact)</button>
@@ -192,7 +192,7 @@ const TRANSLATIONS = {
     kerf1dLabel:"Blade / Kerf width (cut loss per cut)",
     piecesNeeded:"Pieces Needed", addPiece:"+ Add Piece Size",
     paste:"📋 Paste", importCsv:"⬆ Import CSV",
-    pasteHint1d:"Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.",
+    pasteHint1d:"Paste rows as: length, qty (one per line) — from a spreadsheet or text.",
     optimizeBtn:"Optimize Cutting Plan",
     cloudBtn:"☁️ Solve with Cloud Optimizer (exact)",
     sheetSize:"Sheet Size", width:"Width", height:"Height",
@@ -314,7 +314,7 @@ async function runCloudOptimize1d(){
   document.querySelectorAll('#items1d .item-row').forEach(row=>{
     const len = parseFloat(row.querySelector('.len').value);
     const qty = parseInt(row.querySelector('.qty').value) || 0;
-    const label = row.querySelector('.label').value || 'Piece';
+    const label = String(len);
     if(len>0 && qty>0){
       const key = len+'|'+label;
       if(!pieceMap[key]) pieceMap[key] = {len, qty:0, label};
@@ -450,8 +450,7 @@ function pasteInto1d(){
       if(isNaN(parseFloat(r[0]))) return;
       const len = parseFloat(r[0]);
       const qty = r[1] ? parseInt(r[1]) : 1;
-      const label = r[2] || 'Piece';
-      if(len>0) addItem1d(len, qty||1, label);
+      if(len>0) addItem1d(len, qty||1);
     });
   });
 }
@@ -481,8 +480,7 @@ function importCsv1d(input){
       if(isNaN(parseFloat(r[0]))) return; // skip header
       const len = parseFloat(r[0]);
       const qty = r[1] ? parseInt(r[1]) : 1;
-      const label = r[2] || 'Piece';
-      if(len>0) addItem1d(len, qty||1, label);
+      if(len>0) addItem1d(len, qty||1);
     });
   };
   reader.readAsText(file);
@@ -546,7 +544,7 @@ function switchTab(t){
 
 /* ---------------- 1D UI ---------------- */
 let itemCount1d = 0;
-function addItem1d(len, qty, label){
+function addItem1d(len, qty){
   itemCount1d++;
   const id = 'i1d_'+itemCount1d;
   const div = document.createElement('div');
@@ -555,13 +553,12 @@ function addItem1d(len, qty, label){
   div.innerHTML = `
     <div style="flex:2;"><label>${t('rowLength')}</label><input type="number" class="len" value="${len||''}" placeholder="e.g. 1200" min="1"></div>
     <div style="flex:1;"><label>${t('rowQty')}</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
-    <div style="flex:2;"><label>${t('rowLabel')}</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Leg"></div>
-    <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
+     <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
   document.getElementById('items1d').appendChild(div);
 }
-addItem1d(1200,4,t('phLeg'));
-addItem1d(800,2,t('phRail'));
-addItem1d(450,6,t('phSupport'));
+addItem1d(1200,4);
+addItem1d(800,2);
+addItem1d(450,6);
 
 /* ---------------- 2D UI ---------------- */
 let itemCount2d = 0;
@@ -773,7 +770,7 @@ function runOptimize1d(){
   document.querySelectorAll('#items1d .item-row').forEach(row=>{
     const len = parseFloat(row.querySelector('.len').value);
     const qty = parseInt(row.querySelector('.qty').value) || 0;
-    const label = row.querySelector('.label').value || ('Piece');
+    const label = String(len);
     if(len>0 && qty>0){
       if(!(label in labelIdx)) labelIdx[label] = idxCounter++;
       for(let i=0;i<qty;i++) pieces.push({len, label});
