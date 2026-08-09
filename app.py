@@ -158,7 +158,7 @@ def health():
 # Optional: serve the frontend index.html directly from this same service
 @app.route("/")
 def serve_index():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "index.html")
 
 
 if __name__ == "__main__":
