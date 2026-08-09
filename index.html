@@ -53,6 +53,8 @@
   .swatch{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle;}
   .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:.9rem;}
   .hint{font-size:.75rem;color:var(--muted);margin-top:-6px;margin-bottom:12px;}
+  .material-summary{background:#F1F5F9;border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin:10px 0 14px;font-size:.8rem;color:var(--navy2);}
+  .material-summary strong{color:var(--navy);}
   .io-row{display:flex;gap:8px;margin-bottom:6px;}
   .btn-io{flex:1;background:#F1F5F9;color:var(--navy2);border:1px solid var(--border);padding:9px;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;}
   .btn-io:active{background:#E2E8F0;}
@@ -123,6 +125,35 @@
       <label data-i18n="kerf1dLabel">Blade / Kerf width (cut loss per cut)</label>
       <input type="number" id="kerf1d" value="3" min="0" step="0.1">
 
+      <h2 style="margin-top:16px;" data-i18n="materialDetails">Rod Details</h2>
+      <div class="row">
+        <div>
+          <label data-i18n="materialType">Material</label>
+          <select id="materialType1d">
+            <option value="Steel" data-i18n="steel">Steel</option>
+            <option value="Aluminium" data-i18n="aluminium">Aluminium</option>
+          </select>
+        </div>
+        <div>
+          <label data-i18n="productType">Product Type</label>
+          <select id="productType1d">
+            <option value="Rod" data-i18n="rod">Rod</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label data-i18n="diameter">Diameter (mm)</label>
+          <input type="number" id="diameter1d" min="0" step="0.1" placeholder="e.g. 12">
+        </div>
+        <div>
+          <label data-i18n="thickness">Thickness (mm)</label>
+          <input type="number" id="thickness1d" min="0" step="0.1" placeholder="e.g. 2">
+        </div>
+      </div>
+      <label data-i18n="specification">Specification / Grade</label>
+      <input type="text" id="specification1d" placeholder="e.g. ASTM A36">
+
       <h2 style="margin-top:16px;" data-i18n="piecesNeeded">Pieces Needed</h2>
       <div id="items1d"></div>
       <button class="btn btn-add" onclick="addItem1d()" data-i18n="addPiece">+ Add Piece Size</button>
@@ -132,7 +163,7 @@
         <button class="btn btn-io" onclick="document.getElementById('csvFile1d').click()" data-i18n="importCsv">⬆ Import CSV</button>
         <input type="file" id="csvFile1d" accept=".csv,text/csv" style="display:none" onchange="importCsv1d(this)">
       </div>
-      <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.</div>
+      <div class="hint" data-i18n="pasteHint1d">Paste rows as: length, qty (one per line) — from a spreadsheet or text.</div>
 
       <button class="btn btn-primary" onclick="runOptimize1d()" data-i18n="optimizeBtn">Optimize Cutting Plan</button>
       <button class="btn btn-cloud" onclick="runCloudOptimize1d()" id="cloudBtn1d" data-i18n="cloudBtn">☁️ Solve with Cloud Optimizer (exact)</button>
@@ -189,10 +220,13 @@ const TRANSLATIONS = {
     subtitle:"Minimize offcut waste on bars, pipes, lumber & sheets",
     tab1d:"1D — Lengths", tab2d:"2D — Sheets",
     stockLength:"Stock Length", length:"Length", unit:"Unit",
+    materialDetails:"Rod Details", materialType:"Material", productType:"Product Type",
+    steel:"Steel", aluminium:"Aluminium", rod:"Rod", diameter:"Diameter (mm)",
+    thickness:"Thickness (mm)", specification:"Specification / Grade",
     kerf1dLabel:"Blade / Kerf width (cut loss per cut)",
     piecesNeeded:"Pieces Needed", addPiece:"+ Add Piece Size",
     paste:"📋 Paste", importCsv:"⬆ Import CSV",
-    pasteHint1d:"Paste rows as: length, qty, label (one per line) — from a spreadsheet or text.",
+    pasteHint1d:"Paste rows as: length, qty (one per line) — from a spreadsheet or text.",
     optimizeBtn:"Optimize Cutting Plan",
     cloudBtn:"☁️ Solve with Cloud Optimizer (exact)",
     sheetSize:"Sheet Size", width:"Width", height:"Height",
@@ -216,10 +250,13 @@ const TRANSLATIONS = {
     cloudSolving:"☁️ Solving (may take up to 60s if server was asleep)...",
   },
   am: {
-    title:"ካቲንግ ኦፕቲማይዘር ፕሮ",
+    title:"አዲል አብዱ Cutting Optimizer Pro",
     subtitle:"ብረት ዘንግ፣ ቧንቧ፣ እንጨትና ሰሌዳ ላይ ብክነትን ይቀንሱ",
     tab1d:"1መ — ርዝመቶች", tab2d:"2መ — ሰሌዳዎች",
     stockLength:"የግንድ ርዝመት", length:"ርዝመት", unit:"መለኪያ",
+    materialDetails:"የዘንግ ዝርዝሮች", materialType:"ቁሳቁስ", productType:"የምርት ዓይነት",
+    steel:"ብረት", aluminium:"አሉሚኒየም", rod:"ዘንግ", diameter:"ዲያሜትር (ሚሜ)",
+    thickness:"ውፍረት (ሚሜ)", specification:"ስፔሲፊኬሽን / ግሬድ",
     kerf1dLabel:"የመጋዝ ውፍረት (በእያንዳንዱ ቁርጥ የሚጠፋ)",
     piecesNeeded:"የሚያስፈልጉ ቁርጥራጮች", addPiece:"+ ቁርጥራጭ መጠን ጨምር",
     paste:"📋 ለጥፍ", importCsv:"⬆ CSV አስገባ",
@@ -251,6 +288,9 @@ const TRANSLATIONS = {
     subtitle:"Baala meeshaalee (bar), paayippii, muka fi gabatee irratti balleessaa xiqqeessaa",
     tab1d:"1D — Dheerina", tab2d:"2D — Gabatee",
     stockLength:"Dheerina Meeshaa", length:"Dheerina", unit:"Madaalii",
+    materialDetails:"Ibsa Rod", materialType:"Gosa Sibiilaa", productType:"Gosa Omishaa",
+    steel:"Steel", aluminium:"Aluminium", rod:"Rod", diameter:"Daayameetira (mm)",
+    thickness:"Furdina (mm)", specification:"Ispeesifikeeshinii / Sadarkaa",
     kerf1dLabel:"Balbala Muraa (kerf) — dheerina murtii tokkoon tokkoon badu",
     piecesNeeded:"Kutaawwan Barbaachisan", addPiece:"+ Hima Kutaa Dabali",
     paste:"📋 Maxxansi", importCsv:"⬆ CSV Fidi",
@@ -314,7 +354,7 @@ async function runCloudOptimize1d(){
   document.querySelectorAll('#items1d .item-row').forEach(row=>{
     const len = parseFloat(row.querySelector('.len').value);
     const qty = parseInt(row.querySelector('.qty').value) || 0;
-    const label = row.querySelector('.label').value || 'Piece';
+    const label = String(len);
     if(len>0 && qty>0){
       const key = len+'|'+label;
       if(!pieceMap[key]) pieceMap[key] = {len, qty:0, label};
@@ -360,6 +400,7 @@ function renderCloudResult1d(data, stockLen, kerf, unit){
       <div class="stat"><div class="num">${data.efficiency}%</div><div class="lbl">${t('statEff')}</div></div>
       <div class="stat"><div class="num">${data.waste.toFixed(0)}${unit}</div><div class="lbl">${t('statWaste')}</div></div>
     </div>
+    ${materialSummaryHtml()}
     <div class="out-row">
       <button class="btn-out" onclick="downloadCsv1d()">${t('downloadCsv')}</button>
       <button class="btn-out" onclick="printResults()">${t('print')}</button>
@@ -399,6 +440,30 @@ function renderCloudResult1d(data, stockLen, kerf, unit){
   resultsDiv.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+function getRodDetails(){
+  return {
+    material: document.getElementById('materialType1d').value,
+    product: document.getElementById('productType1d').value,
+    diameter: document.getElementById('diameter1d').value,
+    thickness: document.getElementById('thickness1d').value,
+    specification: document.getElementById('specification1d').value.trim()
+  };
+}
+function materialSummaryHtml(){
+  const d = getRodDetails();
+  const details = [
+    `${t('materialType')}: ${escapeHtml(d.material)}`,
+    `${t('productType')}: ${escapeHtml(d.product)}`,
+    d.diameter ? `${t('diameter')}: ${escapeHtml(d.diameter)}` : '',
+    d.thickness ? `${t('thickness')}: ${escapeHtml(d.thickness)}` : '',
+    d.specification ? `${t('specification')}: ${escapeHtml(d.specification)}` : ''
+  ].filter(Boolean);
+  return `<div class="material-summary"><strong>${t('materialDetails')}:</strong> ${details.join(' • ')}</div>`;
+}
 
 let lastResult1d = null;
 let lastResult2d = null;
@@ -450,8 +515,7 @@ function pasteInto1d(){
       if(isNaN(parseFloat(r[0]))) return;
       const len = parseFloat(r[0]);
       const qty = r[1] ? parseInt(r[1]) : 1;
-      const label = r[2] || 'Piece';
-      if(len>0) addItem1d(len, qty||1, label);
+      if(len>0) addItem1d(len, qty||1);
     });
   });
 }
@@ -481,8 +545,7 @@ function importCsv1d(input){
       if(isNaN(parseFloat(r[0]))) return; // skip header
       const len = parseFloat(r[0]);
       const qty = r[1] ? parseInt(r[1]) : 1;
-      const label = r[2] || 'Piece';
-      if(len>0) addItem1d(len, qty||1, label);
+      if(len>0) addItem1d(len, qty||1);
     });
   };
   reader.readAsText(file);
@@ -546,7 +609,7 @@ function switchTab(t){
 
 /* ---------------- 1D UI ---------------- */
 let itemCount1d = 0;
-function addItem1d(len, qty, label){
+function addItem1d(len, qty){
   itemCount1d++;
   const id = 'i1d_'+itemCount1d;
   const div = document.createElement('div');
@@ -555,13 +618,12 @@ function addItem1d(len, qty, label){
   div.innerHTML = `
     <div style="flex:2;"><label>${t('rowLength')}</label><input type="number" class="len" value="${len||''}" placeholder="e.g. 1200" min="1"></div>
     <div style="flex:1;"><label>${t('rowQty')}</label><input type="number" class="qty" value="${qty||1}" min="1"></div>
-    <div style="flex:2;"><label>${t('rowLabel')}</label><input type="text" class="label" value="${label||''}" placeholder="e.g. Leg"></div>
-    <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
+     <button class="del" onclick="document.getElementById('${id}').remove()">✕</button>`;
   document.getElementById('items1d').appendChild(div);
 }
-addItem1d(1200,4,t('phLeg'));
-addItem1d(800,2,t('phRail'));
-addItem1d(450,6,t('phSupport'));
+addItem1d(1200,4);
+addItem1d(800,2);
+addItem1d(450,6);
 
 /* ---------------- 2D UI ---------------- */
 let itemCount2d = 0;
@@ -773,7 +835,7 @@ function runOptimize1d(){
   document.querySelectorAll('#items1d .item-row').forEach(row=>{
     const len = parseFloat(row.querySelector('.len').value);
     const qty = parseInt(row.querySelector('.qty').value) || 0;
-    const label = row.querySelector('.label').value || ('Piece');
+    const label = String(len);
     if(len>0 && qty>0){
       if(!(label in labelIdx)) labelIdx[label] = idxCounter++;
       for(let i=0;i<qty;i++) pieces.push({len, label});
@@ -806,6 +868,7 @@ function runOptimize1d(){
       <div class="stat"><div class="num">${efficiency}%</div><div class="lbl">${t('statEff')}</div></div>
       <div class="stat"><div class="num">${totalWaste.toFixed(0)}${unit}</div><div class="lbl">${t('statWaste')}</div></div>
     </div>
+    ${materialSummaryHtml()}
     <div class="out-row">
       <button class="btn-out" onclick="downloadCsv1d()">${t('downloadCsv')}</button>
       <button class="btn-out" onclick="printResults()">${t('print')}</button>
