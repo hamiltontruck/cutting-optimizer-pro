@@ -243,7 +243,7 @@ const TRANSLATIONS = {
     errSheet:"Enter valid sheet dimensions.", errPanels:"Add at least one panel size.",
     overLenWarn:"piece(s) longer than stock length were skipped — they don't fit on a single stock bar.",
     overSizeWarn:"panel(s) too large for the sheet (even rotated) were skipped.",
-    pasteModal1dTitle:"Paste Piece List", pasteModal2dTitle:"Paste Panel List",
+    pasteModal1dTitle:"Adil Rebar Cutting Optimizer — Paste Length & Qty", pasteModal2dTitle:"Paste Panel List",
     cancel:"Cancel", addItems:"Add Items",
     cloudOk:"✅ Proven optimal solution from Google OR-Tools.",
     cloudPartial:"⚠️ Best solution found within time limit (may not be provably optimal).",
@@ -260,7 +260,7 @@ const TRANSLATIONS = {
     kerf1dLabel:"የመጋዝ ውፍረት (በእያንዳንዱ ቁርጥ የሚጠፋ)",
     piecesNeeded:"የሚያስፈልጉ ቁርጥራጮች", addPiece:"+ ቁርጥራጭ መጠን ጨምር",
     paste:"📋 ለጥፍ", importCsv:"⬆ CSV አስገባ",
-    pasteHint1d:"ረድፎችን በዚህ መልኩ ይለጥፉ፦ ርዝመት, ብዛት, መለያ (በአንድ መስመር) — ከሠንጠረዥ ወይም ከጽሁፍ።",
+    pasteHint1d:"ረድፎችን በዚህ መልኩ ይለጥፉ፦ ርዝመት, ብዛት (በአንድ መስመር)።",
     optimizeBtn:"የመቁረጫ እቅድ አመቻች",
     cloudBtn:"☁️ በደመና ኦፕቲማይዘር ፍታ (ትክክለኛ)",
     sheetSize:"የሰሌዳ መጠን", width:"ስፋት", height:"ቁመት",
@@ -277,7 +277,7 @@ const TRANSLATIONS = {
     errSheet:"ትክክለኛ የሰሌዳ መጠኖችን ያስገቡ።", errPanels:"ቢያንስ አንድ ሰሌዳ መጠን ያክሉ።",
     overLenWarn:"ቁርጥራጮች ከግንድ ርዝመት ስለሚረዝሙ ታልፈዋል — በአንድ ግንድ ላይ አይገጥሙም።",
     overSizeWarn:"ሰሌዳዎች ለሰሌዳው በጣም ትልቅ ስለሆኑ (ተገልብጠውም እንኳ) ታልፈዋል።",
-    pasteModal1dTitle:"የቁርጥራጭ ዝርዝር ለጥፍ", pasteModal2dTitle:"የሰሌዳ ዝርዝር ለጥፍ",
+    pasteModal1dTitle:"Adil Rebar Cutting Optimizer — ርዝመትና ብዛት ለጥፍ", pasteModal2dTitle:"የሰሌዳ ዝርዝር ለጥፍ",
     cancel:"ሰርዝ", addItems:"እቃዎችን ጨምር",
     cloudOk:"✅ በGoogle OR-Tools የተረጋገጠ ምርጥ መፍትሄ።",
     cloudPartial:"⚠️ በጊዜ ገደብ ውስጥ የተገኘ ምርጥ መፍትሄ (ሙሉ በሙሉ ላይረጋገጥ ይችላል)።",
@@ -294,7 +294,7 @@ const TRANSLATIONS = {
     kerf1dLabel:"Balbala Muraa (kerf) — dheerina murtii tokkoon tokkoon badu",
     piecesNeeded:"Kutaawwan Barbaachisan", addPiece:"+ Hima Kutaa Dabali",
     paste:"📋 Maxxansi", importCsv:"⬆ CSV Fidi",
-    pasteHint1d:"Sarara akka: dheerina, baay'ina, maqaa (tokkoon tokkoon sarara) — sanadaa ykn barruu irraa maxxansi.",
+    pasteHint1d:"Sarara akka: dheerina, baay’ina (tokkoon tokkoon sarara) maxxansi.",
     optimizeBtn:"Karoora Muraa Fooyyessi",
     cloudBtn:"☁️ Furmaata Cloud Optimizer (sirriitti)",
     sheetSize:"Bal'ina Gabatee", width:"Bal'ina", height:"Dheerina Ol Ka'aa",
@@ -311,7 +311,7 @@ const TRANSLATIONS = {
     errSheet:"Bal'ina gabatee sirrii galchi.", errPanels:"Yoo xiqqaate hima gabatee tokko dabali.",
     overLenWarn:"kutaaleen dheerina meeshaa caalu darbamaniiru — meeshaa tokko irratti hin ta'an.",
     overSizeWarn:"gabateewwan gabatee caalaa guddaa ta'an (garagalfamanis) darbamaniiru.",
-    pasteModal1dTitle:"Tarree Kutaa Maxxansi", pasteModal2dTitle:"Tarree Gabatee Maxxansi",
+    pasteModal1dTitle:"Adil Rebar Cutting Optimizer — Dheerina fi Baay’ina Maxxansi", pasteModal2dTitle:"Tarree Gabatee Maxxansi",
     cancel:"Haqi", addItems:"Meeshaalee Dabali",
     cloudOk:"✅ Furmaata sirrii Google OR-Tools irraa mirkanaa'e.",
     cloudPartial:"⚠️ Furmaata gaarii daangaa yeroo keessatti argame (mirkanaa'aa hin ta'u).",
@@ -507,7 +507,7 @@ function openPasteModal(title, placeholder, onApply){
 }
 
 function pasteInto1d(){
-  openPasteModal(t('pasteModal1dTitle'), 'e.g.\n1200, 4, Leg\n800, 2, Rail\n450, 6, Support', (text)=>{
+  openPasteModal(t('pasteModal1dTitle'), 'Length, Qty\n1200, 4\n800, 2\n450, 6', (text)=>{
     const rows = csvParseRows(text);
     rows.forEach(r=>{
       if(r.length===0) return;
