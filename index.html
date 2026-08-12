@@ -546,18 +546,21 @@ function openPasteModal(title, placeholder, onApply){
   };
 }
 
-function pasteInto1d(){
-  openPasteModal(t('pasteModal1dTitle'), 'Length, Qty\n1200, 4\n800, 2\n450, 6', (text)=>{
+async function pasteInto1d(){
+  try {
+    const text = await navigator.clipboard.readText();
     const rows = csvParseRows(text);
+    let added = 0;
     rows.forEach(r=>{
-      if(r.length===0) return;
-      // skip header row if non-numeric first cell
-      if(isNaN(parseFloat(r[0]))) return;
+      if(r.length===0 || isNaN(parseFloat(r[0]))) return;
       const len = parseFloat(r[0]);
       const qty = r[1] ? parseInt(r[1]) : 1;
-      if(len>0) addItem1d(len, qty||1);
+      if(len>0){ addItem1d(len, qty||1); added++; }
     });
-  });
+    if(!added) alert('Copy the Length and Qty columns from Excel, then tap Paste.');
+  } catch(e) {
+    alert('Copy the Length and Qty columns, tap Paste again, and allow clipboard access.');
+  }
 }
 function pasteInto2d(){
   openPasteModal(t('pasteModal2dTitle'), 'e.g.\n600, 400, 3, Shelf\n800, 300, 2, Divider', (text)=>{
